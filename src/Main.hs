@@ -17,16 +17,16 @@ main = print $ eval (TmPred (TmSucc TmZero))
 isNumericVal :: Term -> Bool
 isNumericVal t =
   case t of
-    TmZero -> True
+    TmZero   -> True
     TmSucc t -> isNumericVal t
-    _ -> False
+    _        -> False
 
 isBoolVal :: Term -> Bool
 isBoolVal t =
   case t of
-    TmTrue -> True
+    TmTrue  -> True
     TmFalse -> True
-    _ -> False
+    _       -> False
 
 isVal :: Term -> Bool
 isVal t =
@@ -47,15 +47,13 @@ eval1 t =
       in TmSucc <$> t1'
     TmPred TmZero ->
       Just TmZero
-    TmPred (TmSucc t1) ->
-      if isNumericVal t1 then Just t1 else Nothing
+    TmPred (TmSucc t1) | isNumericVal t1 -> Just t1
     TmPred t1 ->
       let t1' = eval1 t1
       in TmPred <$> t1'
     TmIsZero TmZero ->
       Just TmTrue
-    TmIsZero (TmSucc t1) ->
-      if isNumericVal t1 then Just TmFalse else Nothing
+    TmIsZero (TmSucc t1) | isNumericVal t1 -> Just TmFalse
     TmIsZero t1 ->
       let t1' = eval1 t1
       in TmIsZero <$> t1'
@@ -70,27 +68,3 @@ eval t =
       eval t''
     Nothing ->
       t
-
-
--- ($) :: (a -> b) -> a -> b
--- class Functor f where
---   fmap :: (a -> b) -> f a -> f b
---
--- class Applicative f where
---   (<*>) :: f (a -> b) -> f a -> f b
---
--- instance Applicative Maybe where
---   (<*>) :: Maybe (a -> b) -> Maybe a -> Maybe b
---   (Just f) <*> (Just a) =
---     Just (f a)
---   (Nothing) <*> _ =
---     Nothing
---
--- instance Functor Maybe where
---   fmap :: (a -> b) -> Maybe a -> Maybe b
---   fmap f ma =
---     case ma of
---       Just a ->
---           Just (f a)
---       Nothing ->
---         Nothing
