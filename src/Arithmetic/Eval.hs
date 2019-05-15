@@ -1,18 +1,6 @@
-module Main where
+module Arithmetic.Eval where
 
-data Term =
-  TmTrue
-  | TmFalse
-  | TmIf Term Term Term
-  | TmZero
-  | TmSucc Term
-  | TmPred Term
-  | TmIsZero Term
-  deriving (Eq, Show)
-
-main :: IO ()
-main = print $ eval (TmPred (TmSucc TmZero))
-
+import           Arithmetic.Syntax
 
 isNumericVal :: Term -> Bool
 isNumericVal t =
@@ -39,24 +27,35 @@ eval1 t =
       Just t1
     TmIf TmFalse _ t2 ->
       Just t2
-    TmIf t1 t2 t3 ->
-      let t1' = eval1 t1
-      in TmIf <$> t1' <*> Just t2 <*> Just t3
-    TmSucc t1 ->
-      let t1' = eval1 t1
-      in TmSucc <$> t1'
+
+    TmIf t1 t2 t3 -> do
+      t1' <- eval1 t1
+      pure $ TmIf t1' t2 t3
+
+    TmSucc t1 -> do
+      t1' <- eval1 t1
+      pure $ TmSucc t1'
+
     TmPred TmZero ->
       Just TmZero
-    TmPred (TmSucc t1) | isNumericVal t1 -> Just t1
+
+    TmPred (TmSucc t1) | isNumericVal t1 ->
+      Just t1
+
     TmPred t1 ->
       let t1' = eval1 t1
       in TmPred <$> t1'
+
     TmIsZero TmZero ->
       Just TmTrue
-    TmIsZero (TmSucc t1) | isNumericVal t1 -> Just TmFalse
+
+    TmIsZero (TmSucc t1) | isNumericVal t1 ->
+      Just TmFalse
+
     TmIsZero t1 ->
       let t1' = eval1 t1
       in TmIsZero <$> t1'
+
     _ ->
       Nothing
 
